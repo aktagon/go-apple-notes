@@ -1,0 +1,27 @@
+try {
+	const Notes = Application('Notes');
+	const noteId = "{{.NoteID}}";
+	
+	const notes = Notes.notes();
+	let targetNote;
+	
+	for (let i = 0; i < notes.length; i++) {
+		if (notes[i].id() === noteId) {
+			targetNote = notes[i];
+			break;
+		}
+	}
+	
+	if (!targetNote) {
+		throw new Error('Note not found with ID: ' + noteId);
+	}
+	
+	JSON.stringify({
+		id: targetNote.id(),
+		name: targetNote.name(),
+		content: targetNote.plaintext(),
+		folder: targetNote.container().name()
+	});
+} catch (error) {
+	throw new Error('Failed to get note: ' + error.message);
+}

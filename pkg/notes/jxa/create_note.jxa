@@ -1,0 +1,61 @@
+const Notes = Application('Notes');
+const title = "{{.Title}}";
+const body = "{{.Body}}";
+const folderName = "{{.FolderName}}";
+
+try {
+	let targetFolder;
+	let usedDefaultFolder = false;
+	let actualFolderName = folderName;
+	
+	const folders = Notes.folders();
+	for (let i = 0; i < folders.length; i++) {
+		if (folders[i].name() === folderName) {
+			targetFolder = folders[i];
+			break;
+		}
+	}
+	
+	if (!targetFolder) {
+		if (folderName === "Notes") {
+			Notes.make({new: 'folder', withProperties: {name: 'Notes'}});
+			usedDefaultFolder = true;
+			
+			const updatedFolders = Notes.folders();
+			for (let i = 0; i < updatedFolders.length; i++) {
+				if (updatedFolders[i].name() === 'Notes') {
+					targetFolder = updatedFolders[i];
+					break;
+				}
+			}
+		} else {
+			throw new Error('Folder "' + folderName + '" not found');
+		}
+	}
+	
+	let newNote;
+	if (targetFolder) {
+		newNote = Notes.make({new: 'note', withProperties: {name: title, body: body}, at: targetFolder});
+		actualFolderName = folderName;
+	} else {
+		newNote = Notes.make({new: 'note', withProperties: {name: title, body: body}});
+		actualFolderName = 'Default';
+	}
+	
+	JSON.stringify({
+		success: true,
+		note: {
+			id: newNote.id(),
+			name: newNote.name(),
+			content: newNote.plaintext(),
+			folder: actualFolderName
+		},
+		folderName: actualFolderName,
+		usedDefaultFolder: usedDefaultFolder
+	});
+} catch (error) {
+	JSON.stringify({
+		success: false,
+		message: 'Failed to create note: ' + error.message
+	});
+}

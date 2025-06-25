@@ -1,0 +1,24 @@
+try {
+	const Notes = Application('Notes');
+	const noteId = "{{.NoteID}}";
+	
+	const notes = Notes.notes();
+	let targetNote;
+	
+	for (let i = 0; i < notes.length; i++) {
+		if (notes[i].id() === noteId) {
+			targetNote = notes[i];
+			break;
+		}
+	}
+	
+	if (!targetNote) {
+		throw new Error('Note not found with ID: ' + noteId);
+	}
+	
+	Notes.delete(targetNote);
+	
+	JSON.stringify({success: true, message: 'Note deleted successfully'});
+} catch (error) {
+	throw new Error('Failed to delete note: ' + error.message);
+}
